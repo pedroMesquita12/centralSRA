@@ -14,23 +14,33 @@
 .custom-scroll::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
-    rgba(59, 130, 246, 0.6),
-    rgba(147, 197, 253, 0.6)
+    rgba(124, 93, 250, 0.55),
+    rgba(184, 175, 255, 0.55)
   );
+
   border-radius: 999px;
-  transition: all 0.2s ease;
+
+  transition: all 0.25s ease;
+
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(
     180deg,
-    rgba(59, 130, 246, 0.9),
-    rgba(147, 197, 253, 0.9)
+    rgba(124, 93, 250, 0.82),
+    rgba(214, 204, 255, 0.82)
   );
 }
 
 /* Firefox */
 .custom-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(59, 130, 246, 0.6) transparent;
+  overflow-y: auto;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  display: none;
 }

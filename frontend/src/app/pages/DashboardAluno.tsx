@@ -3,15 +3,9 @@ import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User } from "../utils/auth";
 import AlunoLayout, { glassCardStyle } from "../components/AlunoLayout";
-import { panelStyle, cardStyle, buttonGlass } from "../../styles/uiStyles";
+import { panelStyle } from "../../styles/uiStyles";
 
-import {
-  Newspaper,
-  ExternalLink,
-  Clock3,
-  FileBadge2,
-  Mic2,
-} from "lucide-react";
+import { Newspaper, ExternalLink } from "lucide-react";
 
 type NewsItem = {
   id: number;
@@ -25,8 +19,8 @@ type NewsItem = {
 export default function DashboardAluno() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-
   const [horas, setHoras] = useState(0);
+
   const noticias: NewsItem[] = [
     {
       id: 1,
@@ -75,22 +69,19 @@ export default function DashboardAluno() {
     setUser(parsedUser);
 
     fetch(`http://localhost:3000/aluno/horas/${parsedUser.identifier}`)
-    .then(res => res.json())
-    .then(data => setHoras(data.horas))
-    .catch(() => setHoras(0));
+      .then((res) => res.json())
+      .then((data) => setHoras(data.horas))
+      .catch(() => setHoras(0));
   }, [navigate]);
 
   if (!user) return null;
 
   return (
     <AlunoLayout user={user} activePage="inicio" horas={horas}>
-      <Card
-        className="rounded-2xl border-0 shadow mb-6"
-       style={panelStyle}
-      >
+      <Card className="rounded-2xl border-0 shadow mb-6" style={panelStyle}>
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <Newspaper className="size-5" />
+            <Newspaper className="size-5 text-[#B8AFFF]" />
             Notícias recentes - Etec, Fatec e Centro Paula Souza
           </CardTitle>
         </CardHeader>
@@ -103,25 +94,41 @@ export default function DashboardAluno() {
                 href={noticia.link}
                 target="_blank"
                 rel="noreferrer"
-                className="block rounded-2xl p-4 transition hover:scale-[1.01] hover:bg-white/10"
-               style={glassCardStyle}
+                className="
+                  block rounded-2xl p-4
+                  border border-white/10
+                  transition-all duration-300
+                  hover:scale-[1.01]
+                  hover:bg-[#ffffff12]
+                  hover:border-[#B8AFFF]/15
+                  shadow-[0_10px_35px_rgba(0,0,0,0.18)]
+                "
+                style={glassCardStyle}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-white/15 text-white">
+                  <span
+                    className="
+                      text-xs px-2 py-1 rounded-full
+                      bg-[#7C5DFA]/14
+                      border border-[#B8AFFF]/10
+                      text-[#D6CCFF]
+                    "
+                  >
                     {noticia.origem}
                   </span>
-                  <ExternalLink className="size-4 text-white/80 shrink-0" />
+
+                  <ExternalLink className="size-4 text-[#B8AFFF]/80 shrink-0" />
                 </div>
 
                 <h3 className="text-white font-semibold text-base mb-2">
                   {noticia.titulo}
                 </h3>
 
-                <p className="text-white/80 text-sm mb-3">
+                <p className="text-white/65 text-sm mb-3">
                   {noticia.resumo}
                 </p>
 
-                <p className="text-white/70 text-xs">
+                <p className="text-white/50 text-xs">
                   Publicado em {noticia.data}
                 </p>
               </a>
