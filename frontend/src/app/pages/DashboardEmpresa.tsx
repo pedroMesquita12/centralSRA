@@ -9,6 +9,7 @@ import {
 } from "../components/ui/card";
 import { User } from "../utils/auth";
 import { panelStyle, cardStyle, buttonGlass } from "../../styles/uiStyles";
+
 import {
   Building2,
   CalendarDays,
@@ -42,14 +43,17 @@ type AlunoInscrito = {
   status_inscricao?: string;
 };
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3000";
 
 function formatarData(dataISO: string) {
   if (!dataISO) return "-";
 
   const data = new Date(dataISO);
 
-  if (Number.isNaN(data.getTime())) return dataISO;
+  if (Number.isNaN(data.getTime()))
+    return dataISO;
 
   return data.toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -58,7 +62,9 @@ function formatarData(dataISO: string) {
   });
 }
 
-function formatarHorario(horario: string | null) {
+function formatarHorario(
+  horario: string | null
+) {
   if (!horario) return "-";
   return horario.slice(0, 5);
 }
@@ -66,39 +72,91 @@ function formatarHorario(horario: string | null) {
 export default function DashboardEmpresa() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [eventos, setEventos] = useState<EventoEmpresa[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [salvando, setSalvando] = useState(false);
-  const [modalSair, setModalSair] = useState(false);
+  const [user, setUser] =
+    useState<User | null>(null);
 
-  const [modalInscritos, setModalInscritos] = useState(false);
-  const [loadingInscritos, setLoadingInscritos] = useState(false);
-  const [inscritos, setInscritos] = useState<AlunoInscrito[]>([]);
-  const [eventoSelecionado, setEventoSelecionado] =
-    useState<EventoEmpresa | null>(null);
+  const [eventos, setEventos] =
+    useState<EventoEmpresa[]>([]);
 
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [tipoEvento, setTipoEvento] = useState("PALESTRA");
-  const [dataEvento, setDataEvento] = useState("");
-  const [horario, setHorario] = useState("");
-  const [cargaHoraria, setCargaHoraria] = useState("");
-  const [palestrante, setPalestrante] = useState("");
-  const [infoPalestrante, setInfoPalestrante] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [modalAberto, setModalAberto] =
+    useState(false);
+
+  const [salvando, setSalvando] =
+    useState(false);
+
+  const [modalSair, setModalSair] =
+    useState(false);
+
+  const [
+    modalInscritos,
+    setModalInscritos,
+  ] = useState(false);
+
+  const [
+    loadingInscritos,
+    setLoadingInscritos,
+  ] = useState(false);
+
+  const [inscritos, setInscritos] =
+    useState<AlunoInscrito[]>([]);
+
+  const [
+    eventoSelecionado,
+    setEventoSelecionado,
+  ] =
+    useState<EventoEmpresa | null>(
+      null
+    );
+
+  const [titulo, setTitulo] =
+    useState("");
+
+  const [descricao, setDescricao] =
+    useState("");
+
+  const [tipoEvento, setTipoEvento] =
+    useState("PALESTRA");
+
+  const [dataEvento, setDataEvento] =
+    useState("");
+
+  const [horario, setHorario] =
+    useState("");
+
+  const [
+    cargaHoraria,
+    setCargaHoraria,
+  ] = useState("");
+
+  const [
+    palestrante,
+    setPalestrante,
+  ] = useState("");
+
+  const [
+    infoPalestrante,
+    setInfoPalestrante,
+  ] = useState("");
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
+    const userData =
+      localStorage.getItem("user");
 
     if (!userData) {
       navigate("/");
       return;
     }
 
-    const parsedUser = JSON.parse(userData) as User;
+    const parsedUser = JSON.parse(
+      userData
+    ) as User;
 
-    if (parsedUser.type !== "empresa") {
+    if (
+      parsedUser.type !== "empresa"
+    ) {
       navigate("/");
       return;
     }
@@ -113,16 +171,27 @@ export default function DashboardEmpresa() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_URL}/eventos/empresa/${user.id}`);
-        const data = await response.json();
+        const response = await fetch(
+          `${API_URL}/eventos/empresa/${user.id}`
+        );
+
+        const data =
+          await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Erro ao carregar eventos");
+          throw new Error(
+            data.message ||
+              "Erro ao carregar eventos"
+          );
         }
 
         setEventos(data);
       } catch (error) {
-        console.error("Erro ao carregar eventos:", error);
+        console.error(
+          "Erro ao carregar eventos:",
+          error
+        );
+
         setEventos([]);
       } finally {
         setLoading(false);
@@ -134,8 +203,12 @@ export default function DashboardEmpresa() {
 
   const totalHoras = useMemo(() => {
     return eventos.reduce(
-      (acc, item) => acc + Number(item.carga_horaria || 0),
-      0,
+      (acc, item) =>
+        acc +
+        Number(
+          item.carga_horaria || 0
+        ),
+      0
     );
   }, [eventos]);
 
@@ -155,7 +228,9 @@ export default function DashboardEmpresa() {
     limparFormulario();
   };
 
-  const criarEvento = async (event: React.FormEvent) => {
+  const criarEvento = async (
+    event: React.FormEvent
+  ) => {
     event.preventDefault();
 
     if (!user) return;
@@ -163,153 +238,248 @@ export default function DashboardEmpresa() {
     try {
       setSalvando(true);
 
-      const response = await fetch(`${API_URL}/eventos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idEmpresa: user.id,
-          titulo,
-          descricao,
-          tipoEvento,
-          dataEvento,
-          horario,
-          cargaHoraria,
-          palestrante,
-          infoPalestrante,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/eventos`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-      const result = await response.json();
+          body: JSON.stringify({
+            idEmpresa: user.id,
+            titulo,
+            descricao,
+            tipoEvento,
+            dataEvento,
+            horario,
+            cargaHoraria,
+            palestrante,
+            infoPalestrante,
+          }),
+        }
+      );
+
+      const result =
+        await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Erro ao criar evento");
+        throw new Error(
+          result.message ||
+            "Erro ao criar evento"
+        );
       }
 
-      setEventos((prev) => [result.evento, ...prev]);
+      setEventos((prev) => [
+        result.evento,
+        ...prev,
+      ]);
+
       fecharModal();
     } catch (error: any) {
-      alert(error.message || "Erro ao criar evento.");
+      alert(
+        error.message ||
+          "Erro ao criar evento."
+      );
     } finally {
       setSalvando(false);
     }
   };
 
-  const excluirEvento = async (idEvento: number) => {
-    if (!confirm("Deseja realmente excluir este evento?")) return;
+  const excluirEvento = async (
+    idEvento: number
+  ) => {
+    if (
+      !confirm(
+        "Deseja realmente excluir este evento?"
+      )
+    )
+      return;
 
     try {
-      const response = await fetch(`${API_URL}/eventos/${idEvento}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${API_URL}/eventos/${idEvento}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Erro ao excluir evento");
+        throw new Error(
+          data.message ||
+            "Erro ao excluir evento"
+        );
       }
 
-      setEventos((prev) => prev.filter((item) => item.id_evento !== idEvento));
+      setEventos((prev) =>
+        prev.filter(
+          (item) =>
+            item.id_evento !==
+            idEvento
+        )
+      );
     } catch (error: any) {
-      alert(error.message || "Erro ao excluir evento.");
+      alert(
+        error.message ||
+          "Erro ao excluir evento."
+      );
     }
   };
 
-  const verInscritos = async (evento: EventoEmpresa) => {
+  const verInscritos = async (
+    evento: EventoEmpresa
+  ) => {
     try {
       setEventoSelecionado(evento);
+
       setModalInscritos(true);
+
       setLoadingInscritos(true);
+
       setInscritos([]);
 
       const response = await fetch(
-        `${API_URL}/eventos/${evento.id_evento}/inscritos`,
+        `${API_URL}/eventos/${evento.id_evento}/inscritos`
       );
 
-      const texto = await response.text();
+      const texto =
+        await response.text();
 
       let data;
+
       try {
         data = JSON.parse(texto);
       } catch {
         throw new Error(
-          "A rota de inscritos não retornou JSON. Verifique o backend.",
+          "A rota de inscritos não retornou JSON."
         );
       }
 
       if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar inscritos");
+        throw new Error(
+          data.message ||
+            "Erro ao buscar inscritos"
+        );
       }
 
       setInscritos(data);
     } catch (error: any) {
-      alert(error.message || "Erro ao carregar inscritos.");
+      alert(
+        error.message ||
+          "Erro ao carregar inscritos."
+      );
     } finally {
       setLoadingInscritos(false);
     }
   };
 
-  const fecharModalInscritos = () => {
-    setModalInscritos(false);
-    setEventoSelecionado(null);
-    setInscritos([]);
-  };
+  const fecharModalInscritos =
+    () => {
+      setModalInscritos(false);
+
+      setEventoSelecionado(null);
+
+      setInscritos([]);
+    };
 
   const handleLogout = () => {
-  setModalSair(true);
-};
+    setModalSair(true);
+  };
 
-const confirmarLogout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  navigate("/");
-};
+  const confirmarLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
 
   if (!user) return null;
 
   return (
     <div
-      className="h-screen overflow-hidden p-4 md:p-6 relative"
+      className="
+        h-screen overflow-hidden
+        p-4 md:p-6
+        relative
+      "
       style={{
         background:
-          "linear-gradient(135deg, #020305 0%, #05070d 42%, #071a44 100%)",
+          "linear-gradient(135deg, #0F1117 0%, #171923 48%, #1D1A2E 100%)",
       }}
     >
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="
+          absolute inset-0
+          pointer-events-none
+        "
         style={{
           background:
-            "radial-gradient(circle at 88% 82%, rgba(37,99,235,0.42), transparent 35%), radial-gradient(circle at 45% 20%, rgba(255,255,255,0.04), transparent 28%)",
+            "radial-gradient(circle at 88% 82%, rgba(124,93,250,0.16), transparent 35%), radial-gradient(circle at 45% 20%, rgba(184,175,255,0.05), transparent 28%)",
         }}
       />
 
       <div className="relative flex h-full gap-10">
         <aside
-          className="w-80 min-h-full p-6 flex flex-col justify-between rounded-2xl"
+          className="
+            w-80 min-h-full
+            p-6 flex flex-col justify-between
+            rounded-2xl
+          "
           style={panelStyle}
         >
           <div>
             <div className="flex items-center gap-3 mb-8">
-              <div className="size-12 rounded-2xl bg-blue-500/15 flex items-center justify-center">
-                <Building2 className="size-7 text-blue-400" />
+              <div
+                className="
+                  size-12 rounded-2xl
+                  bg-[#7C5DFA]/14
+                  border border-[#B8AFFF]/10
+                  flex items-center justify-center
+                "
+              >
+                <Building2 className="size-7 text-[#B8AFFF]" />
               </div>
 
               <div>
-                <h2 className="text-2xl font-semibold text-white">Empresa</h2>
-                <p className="text-white/60 text-sm">Painel corporativo</p>
+                <h2 className="text-2xl font-semibold text-white">
+                  Empresa
+                </h2>
+
+                <p className="text-white/55 text-sm">
+                  Painel corporativo
+                </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl p-4" style={cardStyle}>
-                <p className="text-white/60 text-sm mb-1">Nome</p>
-                <p className="text-white font-semibold">{user.name}</p>
+              <div
+                className="rounded-2xl p-4"
+                style={cardStyle}
+              >
+                <p className="text-white/55 text-sm mb-1">
+                  Nome
+                </p>
+
+                <p className="text-white font-semibold">
+                  {user.name}
+                </p>
               </div>
 
-              <div className="rounded-2xl p-4" style={cardStyle}>
-                <p className="text-white/60 text-sm mb-1">Login</p>
-                <p className="text-white font-semibold">{user.identifier}</p>
+              <div
+                className="rounded-2xl p-4"
+                style={cardStyle}
+              >
+                <p className="text-white/55 text-sm mb-1">
+                  Login
+                </p>
+
+                <p className="text-white font-semibold">
+                  {user.identifier}
+                </p>
               </div>
             </div>
           </div>
@@ -317,67 +487,135 @@ const confirmarLogout = () => {
           <Button
             onClick={handleLogout}
             style={buttonGlass}
-            className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-white bg-white/10 hover:bg-white/15 mt-8 border border-white/10"
+            className="
+              w-full h-12
+              flex items-center justify-center gap-2
+              rounded-xl
+              text-white
+              bg-[#7C5DFA]/14
+              hover:bg-[#7C5DFA]/20
+              border border-[#B8AFFF]/10
+              mt-8
+            "
           >
             <LogOut className="size-4" />
             Sair
           </Button>
         </aside>
 
-        <main className="flex-1 rounded-2xl p-6 overflow-hidden">
+        <main
+          className="
+            flex-1
+            rounded-2xl
+            p-6
+            overflow-hidden
+          "
+        >
           <div
             className="
-              max-w-7xl mx-auto h-full overflow-y-auto pr-2
+              max-w-7xl mx-auto
+              h-full overflow-y-auto pr-2
               [scrollbar-width:none]
               [-ms-overflow-style:none]
               [&::-webkit-scrollbar]:hidden
             "
           >
             <header
-              className="flex items-center justify-between mb-8 p-6 rounded-2xl"
+              className="
+                flex items-center justify-between
+                mb-8 p-6 rounded-2xl
+              "
               style={panelStyle}
             >
               <div className="flex items-center gap-4">
-                <Building2 className="size-9 text-blue-400" />
+                <Building2 className="size-9 text-[#B8AFFF]" />
+
                 <div>
                   <h1 className="text-3xl font-semibold text-white">
                     Central SRA
                   </h1>
-                  <p className="text-white/70 text-base">
-                    Bem-vindo(a), {user.name}
+
+                  <p className="text-white/60 text-base">
+                    Bem-vindo(a),{" "}
+                    {user.name}
                   </p>
                 </div>
               </div>
 
               <Button
-                onClick={() => setModalAberto(true)}
-                className="rounded-xl bg-white text-[#2f3147] hover:bg-white/90 flex items-center gap-2 px-5 py-2"
+                onClick={() =>
+                  setModalAberto(true)
+                }
+                className="
+                  rounded-xl
+                  bg-[#7C5DFA]/18
+                  hover:bg-[#7C5DFA]/24
+                  border border-[#B8AFFF]/10
+                  text-[#F5F3FF]
+                  flex items-center gap-2
+                  px-5 py-2
+                  shadow-[0_10px_35px_rgba(0,0,0,0.22)]
+                "
               >
                 <Plus className="size-4" />
                 Novo evento
               </Button>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-white/10 rounded-2xl p-5">
-                <p className="text-white/60 text-sm">Eventos publicados</p>
+            <div
+              className="
+                grid grid-cols-1 md:grid-cols-2
+                gap-4 mb-6
+              "
+            >
+              <div
+                className="
+                  bg-[#ffffff08]
+                  rounded-2xl
+                  p-5
+                  border border-white/10
+                  backdrop-blur-[18px]
+                "
+              >
+                <p className="text-white/55 text-sm">
+                  Eventos publicados
+                </p>
+
                 <h2 className="text-white text-2xl font-semibold mt-1">
                   {eventos.length}
                 </h2>
               </div>
 
-              <div className="bg-white/10 rounded-2xl p-5">
-                <p className="text-white/60 text-sm">Horas ofertadas</p>
+              <div
+                className="
+                  bg-[#ffffff08]
+                  rounded-2xl
+                  p-5
+                  border border-white/10
+                  backdrop-blur-[18px]
+                "
+              >
+                <p className="text-white/55 text-sm">
+                  Horas ofertadas
+                </p>
+
                 <h2 className="text-white text-2xl font-semibold mt-1">
                   {totalHoras}h
                 </h2>
               </div>
             </div>
 
-            <Card className="rounded-3xl border-0 mb-6" style={panelStyle}>
+            <Card
+              className="
+                rounded-3xl
+                border-0
+                mb-6
+              "
+              style={panelStyle}
+            >
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <CalendarDays className="size-5 text-blue-400" />
+                  <CalendarDays className="size-5 text-[#B8AFFF]" />
                   Meus eventos
                 </CardTitle>
               </CardHeader>
@@ -385,99 +623,168 @@ const confirmarLogout = () => {
               <CardContent>
                 {loading ? (
                   <div
-                    className="rounded-2xl p-8 text-center"
+                    className="
+                      rounded-2xl
+                      p-8 text-center
+                    "
                     style={cardStyle}
                   >
-                    <p className="text-white/70">Carregando eventos...</p>
+                    <p className="text-white/60">
+                      Carregando eventos...
+                    </p>
                   </div>
                 ) : eventos.length === 0 ? (
                   <div
-                    className="rounded-2xl p-8 text-center"
+                    className="
+                      rounded-2xl
+                      p-8 text-center
+                    "
                     style={cardStyle}
                   >
-                    <CalendarDays className="size-10 text-white/70 mx-auto mb-3" />
+                    <CalendarDays className="size-10 text-white/50 mx-auto mb-3" />
+
                     <h3 className="text-white text-lg font-semibold mb-1">
                       Nenhum evento publicado
                     </h3>
-                    <p className="text-white/70">
-                      Clique em novo evento para criar sua primeira publicação.
+
+                    <p className="text-white/60">
+                      Clique em novo evento
+                      para criar sua primeira
+                      publicação.
                     </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                    {eventos.map((evento) => (
-                      <div
-                        key={evento.id_evento}
-                        className="rounded-2xl p-5 border border-white/10"
-                        style={cardStyle}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
-                            <span className="inline-flex rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-400 mb-3">
-                              {evento.tipo_evento || "EVENTO"}
-                            </span>
+                    {eventos.map(
+                      (evento) => (
+                        <div
+                          key={
+                            evento.id_evento
+                          }
+                          className="
+                            rounded-2xl
+                            p-5
+                            border border-white/10
+                            backdrop-blur-[18px]
+                          "
+                          style={cardStyle}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0">
+                              <span
+                                className="
+                                  inline-flex
+                                  rounded-full
+                                  bg-[#7C5DFA]/14
+                                  border border-[#B8AFFF]/10
+                                  px-3 py-1
+                                  text-xs font-semibold
+                                  text-[#D6CCFF]
+                                  mb-3
+                                "
+                              >
+                                {evento.tipo_evento ||
+                                  "EVENTO"}
+                              </span>
 
-                            <h3 className="text-white font-semibold text-xl mb-2">
-                              {evento.titulo}
-                            </h3>
+                              <h3 className="text-white font-semibold text-xl mb-2">
+                                {
+                                  evento.titulo
+                                }
+                              </h3>
 
-                            <p className="text-white/70 text-sm mb-3 line-clamp-3">
-                              {evento.descricao || "Sem descrição informada."}
-                            </p>
-
-                            <div className="space-y-1 text-sm text-white/70">
-                              <p>
-                                Data:{" "}
-                                <span className="text-white">
-                                  {formatarData(evento.data_evento)}
-                                </span>
+                              <p className="text-white/60 text-sm mb-3 line-clamp-3">
+                                {evento.descricao ||
+                                  "Sem descrição informada."}
                               </p>
 
-                              <p>
-                                Horário:{" "}
-                                <span className="text-white">
-                                  {formatarHorario(evento.horario)}
-                                </span>
-                              </p>
+                              <div className="space-y-1 text-sm text-white/60">
+                                <p>
+                                  Data:{" "}
+                                  <span className="text-white">
+                                    {formatarData(
+                                      evento.data_evento
+                                    )}
+                                  </span>
+                                </p>
 
-                              <p>
-                                Carga horária:{" "}
-                                <span className="text-white font-semibold">
-                                  {evento.carga_horaria}h
-                                </span>
-                              </p>
+                                <p>
+                                  Horário:{" "}
+                                  <span className="text-white">
+                                    {formatarHorario(
+                                      evento.horario
+                                    )}
+                                  </span>
+                                </p>
 
-                              <p>
-                                Palestrante:{" "}
-                                <span className="text-white">
-                                  {evento.palestrante || "-"}
-                                </span>
-                              </p>
+                                <p>
+                                  Carga
+                                  horária:{" "}
+                                  <span className="text-white font-semibold">
+                                    {
+                                      evento.carga_horaria
+                                    }
+                                    h
+                                  </span>
+                                </p>
+
+                                <p>
+                                  Palestrante:{" "}
+                                  <span className="text-white">
+                                    {evento.palestrante ||
+                                      "-"}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2 shrink-0">
+                              <button
+                                onClick={() =>
+                                  verInscritos(
+                                    evento
+                                  )
+                                }
+                                className="
+                                  px-3 py-2
+                                  rounded-xl
+                                  bg-[#7C5DFA]/14
+                                  hover:bg-[#7C5DFA]/20
+                                  border border-[#B8AFFF]/10
+                                  text-[#D6CCFF]
+                                  text-sm
+                                  flex items-center gap-2
+                                  transition-all duration-300
+                                "
+                                type="button"
+                              >
+                                <Eye className="size-4" />
+                                Inscritos
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  excluirEvento(
+                                    evento.id_evento
+                                  )
+                                }
+                                className="
+                                  p-2 rounded-xl
+                                  bg-red-500/12
+                                  hover:bg-red-500/18
+                                  border border-red-300/10
+                                  transition-all duration-300
+                                "
+                                title="Excluir evento"
+                                type="button"
+                              >
+                                <Trash2 className="size-5 text-red-300" />
+                              </button>
                             </div>
                           </div>
-
-                          <div className="flex flex-col items-end gap-2 shrink-0">
-                            <button
-                              onClick={() => verInscritos(evento)}
-                              className="px-3 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm flex items-center gap-2"
-                              type="button"
-                            >
-                              <Eye className="size-4" />
-                              Inscritos
-                            </button>
-
-                            <button
-                              onClick={() => excluirEvento(evento.id_evento)}
-                              className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 transition"
-                              title="Excluir evento"
-                              type="button"
-                            >
-                              <Trash2 className="size-5 text-red-300" />
-                            </button>
-                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -487,17 +794,37 @@ const confirmarLogout = () => {
       </div>
 
       {modalAberto && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div
+          className="
+            fixed inset-0
+            bg-black/72
+            backdrop-blur-sm
+            flex items-center justify-center
+            z-50 p-4
+          "
+        >
           <div
-            className="w-full max-w-2xl rounded-2xl p-6 shadow-xl"
+            className="
+              w-full max-w-2xl
+              rounded-2xl
+              p-6 shadow-xl
+            "
             style={panelStyle}
           >
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-semibold text-white">Novo evento</h2>
+              <h2 className="text-xl font-semibold text-white">
+                Novo evento
+              </h2>
 
               <button
                 onClick={fecharModal}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition"
+                className="
+                  p-2 rounded-xl
+                  bg-[#ffffff08]
+                  hover:bg-[#ffffff12]
+                  border border-white/10
+                  transition-all duration-300
+                "
                 type="button"
               >
                 <X className="size-5 text-white" />
@@ -506,95 +833,223 @@ const confirmarLogout = () => {
 
             <form
               onSubmit={criarEvento}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="
+                grid grid-cols-1 md:grid-cols-2
+                gap-4
+              "
             >
               <div className="md:col-span-2">
-                <label className="block text-white mb-2">Título</label>
+                <label className="block text-white mb-2">
+                  Título
+                </label>
+
                 <input
                   value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
+                  onChange={(e) =>
+                    setTitulo(
+                      e.target.value
+                    )
+                  }
                   required
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                    focus:border-[#B8AFFF]/20
+                    focus:ring-2
+                    focus:ring-[#B8AFFF]/10
+                    transition-all duration-300
+                  "
                   placeholder="Ex: Palestra de Tecnologia"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-white mb-2">Descrição</label>
+                <label className="block text-white mb-2">
+                  Descrição
+                </label>
+
                 <textarea
                   value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
+                  onChange={(e) =>
+                    setDescricao(
+                      e.target.value
+                    )
+                  }
                   rows={4}
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none resize-none"
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none resize-none
+                    backdrop-blur-[18px]
+                    focus:border-[#B8AFFF]/20
+                    focus:ring-2
+                    focus:ring-[#B8AFFF]/10
+                    transition-all duration-300
+                  "
                   placeholder="Descreva o evento..."
                 />
               </div>
 
               <div>
-                <label className="block text-white mb-2">Tipo</label>
+                <label className="block text-white mb-2">
+                  Tipo
+                </label>
+
                 <select
                   value={tipoEvento}
-                  onChange={(e) => setTipoEvento(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 p-3 outline-none bg-[#252938] text-white focus:border-blue-400"
+                  onChange={(e) =>
+                    setTipoEvento(
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full rounded-xl
+                    border border-white/10
+                    p-3 outline-none
+                    bg-[#1A1D29]
+                    text-white
+                    focus:border-[#B8AFFF]/20
+                  "
                 >
-                  <option className="bg-[#252938] text-white" value="PALESTRA">
+                  <option
+                    className="bg-[#1A1D29]"
+                    value="PALESTRA"
+                  >
                     Palestra
                   </option>
-                  <option className="bg-[#252938] text-white" value="WORKSHOP">
+
+                  <option
+                    className="bg-[#1A1D29]"
+                    value="WORKSHOP"
+                  >
                     Workshop
                   </option>
-                  <option className="bg-[#252938] text-white" value="FEIRA">
+
+                  <option
+                    className="bg-[#1A1D29]"
+                    value="FEIRA"
+                  >
                     Feira
                   </option>
-                  <option className="bg-[#252938] text-white" value="CURSO">
+
+                  <option
+                    className="bg-[#1A1D29]"
+                    value="CURSO"
+                  >
                     Curso
                   </option>
-                  <option className="bg-[#252938] text-white" value="OUTRO">
+
+                  <option
+                    className="bg-[#1A1D29]"
+                    value="OUTRO"
+                  >
                     Outro
                   </option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-white mb-2">Carga horária</label>
+                <label className="block text-white mb-2">
+                  Carga horária
+                </label>
+
                 <input
                   type="number"
                   min={1}
                   value={cargaHoraria}
-                  onChange={(e) => setCargaHoraria(e.target.value)}
+                  onChange={(e) =>
+                    setCargaHoraria(
+                      e.target.value
+                    )
+                  }
                   required
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                  "
                   placeholder="Ex: 4"
                 />
               </div>
 
               <div>
-                <label className="block text-white mb-2">Data</label>
+                <label className="block text-white mb-2">
+                  Data
+                </label>
+
                 <input
                   type="date"
                   value={dataEvento}
-                  onChange={(e) => setDataEvento(e.target.value)}
+                  onChange={(e) =>
+                    setDataEvento(
+                      e.target.value
+                    )
+                  }
                   required
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                  "
                 />
               </div>
 
               <div>
-                <label className="block text-white mb-2">Horário</label>
+                <label className="block text-white mb-2">
+                  Horário
+                </label>
+
                 <input
                   type="time"
                   value={horario}
-                  onChange={(e) => setHorario(e.target.value)}
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  onChange={(e) =>
+                    setHorario(
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                  "
                 />
               </div>
 
               <div>
-                <label className="block text-white mb-2">Palestrante</label>
+                <label className="block text-white mb-2">
+                  Palestrante
+                </label>
+
                 <input
                   value={palestrante}
-                  onChange={(e) => setPalestrante(e.target.value)}
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  onChange={(e) =>
+                    setPalestrante(
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                  "
                   placeholder="Nome do palestrante"
                 />
               </div>
@@ -603,10 +1058,24 @@ const confirmarLogout = () => {
                 <label className="block text-white mb-2">
                   Info palestrante
                 </label>
+
                 <input
-                  value={infoPalestrante}
-                  onChange={(e) => setInfoPalestrante(e.target.value)}
-                  className="w-full rounded-xl bg-white/10 border border-white/10 p-3 text-white outline-none"
+                  value={
+                    infoPalestrante
+                  }
+                  onChange={(e) =>
+                    setInfoPalestrante(
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full rounded-xl
+                    bg-[#ffffff08]
+                    border border-white/10
+                    p-3 text-white
+                    outline-none
+                    backdrop-blur-[18px]
+                  "
                   placeholder="Ex: Especialista em tecnologia"
                 />
               </div>
@@ -614,13 +1083,17 @@ const confirmarLogout = () => {
               <div className="md:col-span-2 flex justify-end gap-3 pt-3">
                 <Button
                   type="button"
-                  onClick={fecharModal}
+                  onClick={
+                    fecharModal
+                  }
                   variant="outline"
-                  className="rounded-xl bg-transparent text-white hover:bg-white/10"
-                  style={{
-                    borderColor: "#8c8da9",
-                    color: "#ffffff",
-                  }}
+                  className="
+                    rounded-xl
+                    bg-[#ffffff08]
+                    hover:bg-[#ffffff12]
+                    border border-white/10
+                    text-white
+                  "
                 >
                   Cancelar
                 </Button>
@@ -628,9 +1101,17 @@ const confirmarLogout = () => {
                 <Button
                   type="submit"
                   disabled={salvando}
-                  className="rounded-xl bg-white text-[#2f3147] hover:bg-white/90"
+                  className="
+                    rounded-xl
+                    bg-[#7C5DFA]/18
+                    hover:bg-[#7C5DFA]/24
+                    border border-[#B8AFFF]/10
+                    text-[#F5F3FF]
+                  "
                 >
-                  {salvando ? "Salvando..." : "Publicar evento"}
+                  {salvando
+                    ? "Salvando..."
+                    : "Publicar evento"}
                 </Button>
               </div>
             </form>
@@ -639,72 +1120,152 @@ const confirmarLogout = () => {
       )}
 
       {modalInscritos && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+          className="
+            fixed inset-0
+            bg-black/72
+            backdrop-blur-sm
+            flex items-center justify-center
+            z-50 p-4
+          "
+        >
           <div
-            className="w-full max-w-lg rounded-2xl p-6 shadow-xl border border-white/10"
+            className="
+              w-full max-w-lg
+              rounded-2xl
+              p-6 shadow-xl
+              border border-white/10
+            "
             style={panelStyle}
           >
-            {/* HEADER */}
             <div className="flex items-start justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-white">
                   Alunos inscritos
                 </h2>
+
                 <p className="text-white/50 text-sm mt-1">
-                  {eventoSelecionado?.titulo}
+                  {
+                    eventoSelecionado?.titulo
+                  }
                 </p>
               </div>
 
               <button
-                onClick={fecharModalInscritos}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition"
+                onClick={
+                  fecharModalInscritos
+                }
+                className="
+                  p-2 rounded-xl
+                  bg-[#ffffff08]
+                  hover:bg-[#ffffff12]
+                  border border-white/10
+                  transition-all duration-300
+                "
                 type="button"
               >
                 <X className="size-5 text-white" />
               </button>
             </div>
 
-            {/* TOTAL */}
-            <div className="rounded-xl bg-white/10 p-4 mb-5 border border-white/10">
-              <p className="text-white/50 text-xs uppercase tracking-wide">
+            <div
+              className="
+                rounded-xl
+                bg-[#ffffff08]
+                p-4 mb-5
+                border border-white/10
+              "
+            >
+              <p
+                className="
+                  text-white/50
+                  text-xs uppercase
+                  tracking-wide
+                "
+              >
                 Total de inscritos
               </p>
+
               <p className="text-white text-3xl font-semibold">
                 {inscritos.length}
               </p>
             </div>
 
-            {/* LISTA */}
-            <div className="space-y-3 max-h-80 overflow-y-auto custom-scroll pr-2">
+            <div
+              className="
+                space-y-3
+                max-h-80
+                overflow-y-auto
+                custom-scroll
+                pr-2
+              "
+            >
               {loadingInscritos ? (
-                <p className="text-white/70 text-center py-4">
-                  Carregando inscritos...
+                <p className="text-white/60 text-center py-4">
+                  Carregando
+                  inscritos...
                 </p>
-              ) : inscritos.length === 0 ? (
-                <p className="text-white/70 text-center py-4">
-                  Nenhum aluno inscrito ainda.
+              ) : inscritos.length ===
+                0 ? (
+                <p className="text-white/60 text-center py-4">
+                  Nenhum aluno
+                  inscrito ainda.
                 </p>
               ) : (
                 inscritos.map((item) => (
                   <div
-                    key={item.id_aluno}
-                    className="rounded-xl bg-white/5 p-4 border border-white/10 hover:bg-white/10 transition"
+                    key={
+                      item.id_aluno
+                    }
+                    className="
+                      rounded-xl
+                      bg-[#ffffff08]
+                      p-4
+                      border border-white/10
+                      hover:bg-[#ffffff12]
+                      transition-all duration-300
+                    "
                   >
-                    <p className="text-white font-semibold">{item.nome}</p>
+                    <p className="text-white font-semibold">
+                      {item.nome}
+                    </p>
 
-                    <div className="mt-1 space-y-1 text-sm text-white/70">
+                    <div
+                      className="
+                        mt-1 space-y-1
+                        text-sm text-white/60
+                      "
+                    >
                       <p>
-                        {item.curso || "Análise e Desenvolvimento de Sistemas"}
+                        {item.curso ||
+                          "Análise e Desenvolvimento de Sistemas"}
                       </p>
 
-                      {item.rm && <p>RM: {item.rm}</p>}
+                      {item.rm && (
+                        <p>
+                          RM:{" "}
+                          {
+                            item.rm
+                          }
+                        </p>
+                      )}
                     </div>
 
-                    {/* STATUS */}
                     {item.status_inscricao && (
                       <div className="mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400">
-                          {item.status_inscricao}
+                        <span
+                          className="
+                            inline-flex items-center
+                            px-2 py-1 rounded-full
+                            text-xs font-semibold
+                            bg-[#7C5DFA]/14
+                            border border-[#B8AFFF]/10
+                            text-[#D6CCFF]
+                          "
+                        >
+                          {
+                            item.status_inscricao
+                          }
                         </span>
                       </div>
                     )}
@@ -713,52 +1274,96 @@ const confirmarLogout = () => {
               )}
             </div>
 
-            {/* FOOTER */}
             <Button
-              onClick={fecharModalInscritos}
-              className="w-full mt-6 rounded-xl bg-white text-[#2f3147] hover:bg-white/90"
+              onClick={
+                fecharModalInscritos
+              }
+              className="
+                w-full mt-6
+                rounded-xl
+                bg-[#7C5DFA]/18
+                hover:bg-[#7C5DFA]/24
+                border border-[#B8AFFF]/10
+                text-[#F5F3FF]
+              "
             >
               Fechar
             </Button>
           </div>
         </div>
       )}
+
       {modalSair && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div
-      className="w-full max-w-md rounded-2xl p-6 border border-white/10 shadow-2xl"
-      style={panelStyle}
-    >
-      <div className="mb-5">
-        <h2 className="text-white text-xl font-semibold">
-          Deseja realmente sair?
-        </h2>
-        <p className="text-white/60 text-sm mt-2">
-          Você será redirecionado para a tela de login.
-        </p>
-      </div>
-
-      <div className="flex justify-end gap-3">
-        <Button
-          type="button"
-          onClick={() => setModalSair(false)}
-          style={buttonGlass}
-          className="rounded-xl text-white hover:bg-white/15 border border-white/10"
+        <div
+          className="
+            fixed inset-0
+            bg-black/72
+            backdrop-blur-sm
+            flex items-center justify-center
+            z-50 p-4
+          "
         >
-          Cancelar
-        </Button>
+          <div
+            className="
+              w-full max-w-md
+              rounded-2xl
+              p-6
+              border border-white/10
+              shadow-2xl
+            "
+            style={panelStyle}
+          >
+            <div className="mb-5">
+              <h2 className="text-white text-xl font-semibold">
+                Deseja realmente
+                sair?
+              </h2>
 
-        <Button
-          type="button"
-          onClick={confirmarLogout}
-          className="rounded-xl bg-red-500/90 text-white hover:bg-red-600"
-        >
-          Sair
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
+              <p className="text-white/60 text-sm mt-2">
+                Você será
+                redirecionado para a
+                tela de login.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                onClick={() =>
+                  setModalSair(
+                    false
+                  )
+                }
+                style={buttonGlass}
+                className="
+                  rounded-xl
+                  text-white
+                  bg-[#ffffff08]
+                  hover:bg-[#ffffff12]
+                  border border-white/10
+                "
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={
+                  confirmarLogout
+                }
+                className="
+                  rounded-xl
+                  bg-red-500/85
+                  hover:bg-red-500
+                  text-white
+                "
+              >
+                Sair
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
